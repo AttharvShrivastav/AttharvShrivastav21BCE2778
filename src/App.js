@@ -125,7 +125,9 @@ const App = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-800">
       <h1 className="text-3xl font-bold text-purple-400 mb-4">Turn-Based Chess-Like Game</h1>
+      <h2 className="text-xl font-semibold text-white mb-4">Developed By Attharv Shrivastav</h2>
       {setupMode ? (
+
         <div>
           <h2 className="text-xl font-semibold text-white mb-4">Setup Your Pieces</h2>
           <PieceSelection onPiecePlace={handlePiecePlacement} onClearBoard={handleClearBoard} />
