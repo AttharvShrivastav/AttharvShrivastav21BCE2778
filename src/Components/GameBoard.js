@@ -47,8 +47,8 @@ const GameBoard = ({ gameState, onMove, currentPlayer }) => {
 
   const handleMove = (move) => {
     if (selectedPiece) {
-      onMove(selectedPiece.id, move); // Pass piece ID instead of type
-      setSelectedPiece(null); // Reset selected piece after move
+      onMove(selectedPiece.id, move); 
+      setSelectedPiece(null); 
     }
   };
 
@@ -57,7 +57,7 @@ const GameBoard = ({ gameState, onMove, currentPlayer }) => {
     return moveOptions.map((move) => (
       <button
         key={move}
-        className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="px-2 py-1 bg-blue-400 text-white rounded hover:bg-blue-600"
         onClick={() => handleMove(move)}
       >
         {move}
@@ -79,10 +79,10 @@ const GameBoard = ({ gameState, onMove, currentPlayer }) => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col items-center">
       <div className="grid grid-cols-5 gap-1 mb-4">{renderBoard()}</div>
       {selectedPiece && (
-        <div className="flex space-x-2">
+        <div className="flex justify-center space-x-2 items-center">
           {renderMoveButtons(selectedPiece.type)}
         </div>
       )}

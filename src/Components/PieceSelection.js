@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const PieceSelection = ({ onPiecePlace }) => {
+const PieceSelection = ({ onPiecePlace, onClearBoard }) => {
   const [currentPlayer, setCurrentPlayer] = useState('A');
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [piecesOnBoard, setPiecesOnBoard] = useState({
@@ -40,11 +40,12 @@ const PieceSelection = ({ onPiecePlace }) => {
   };
 
   const clearBoard = () => {
+    // Clear pieces on board for the current player
     setPiecesOnBoard((prev) => ({
       ...prev,
       [currentPlayer]: [],
     }));
-    onPiecePlace(currentPlayer, []); // Clear board for the current player
+    onClearBoard(currentPlayer); // Notify parent to clear pieces for the current player
     setSelectedPiece(null); // Reset selection after clearing
   };
 

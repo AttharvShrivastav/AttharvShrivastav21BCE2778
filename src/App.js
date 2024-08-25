@@ -8,11 +8,13 @@ const App = () => {
   const [gameState, setGameState] = useState({
     board: Array(5).fill(null).map(() => Array(5).fill(null)),
     players: {},
-    currentPlayer: 'A'
+    currentPlayer: 'A',
   });
-  const [setupMode, setSetupMode] = useState(true); // Setup mode state
+  const [setupMode, setSetupMode] = useState(true);
   const [playerAPieces, setPlayerAPieces] = useState([]);
   const [playerBPieces, setPlayerBPieces] = useState([]);
+  const [selectedPiece, setSelectedPiece] = useState(null); // Track selected piece
+  const [potentialMoves, setPotentialMoves] = useState([]); // Track potential moves
 
   useEffect(() => {
     const websocket = new WebSocket('ws://localhost:8080');
@@ -23,6 +25,8 @@ const App = () => {
 
       if (message.type === 'gameState') {
         setGameState(message.state);
+        setSelectedPiece(null); // Deselect piece after move
+        setPotentialMoves([]);  // Clear potential moves after move
       } else if (message.type === 'invalidMove') {
         alert('Invalid move, please try again.');
       } else if (message.type === 'outOfTurn') {
@@ -49,7 +53,7 @@ const App = () => {
         playerB: playerBPieces,
       };
       ws.send(JSON.stringify({ type: 'initialize', data: initialSetup }));
-      setSetupMode(false); // Exit setup mode
+      setSetupMode(false);
     }
   };
 
@@ -61,14 +65,55 @@ const App = () => {
     }
   };
 
+  const handleClearBoard = (player) => {
+    if (player === 'A') {
+      setPlayerAPieces([]);
+    } else {
+      setPlayerBPieces([]);
+    }
+  };
+
   const allSpacesFilled = (pieces, row) => {
-    // Check if all 5 spaces in the specified row are filled
     return pieces.filter(piece => piece.position.y === row).length === 5;
   };
 
   const canStartGame = () => {
-    // Check if all spaces on both players' starting rows are filled
     return allSpacesFilled(playerAPieces, 0) && allSpacesFilled(playerBPieces, 4);
+  };
+
+  const selectPiece = (piece) => {
+    setSelectedPiece(piece);
+
+    // Calculate potential moves based on piece type
+    const moves = calculatePotentialMoves(piece);
+    setPotentialMoves(moves);
+  };
+
+  const calculatePotentialMoves = (piece) => {
+    const moves = [];
+    const { x, y } = piece.position;
+
+    // Example logic for calculating potential moves for a Pawn
+    if (piece.type === 'P') {
+      if (piece.player === 'A') {
+        if (y > 0) moves.push({ x, y: y - 1 }); // Forward
+        if (x > 0) moves.push({ x: x - 1, y }); // Left
+        if (x < 4) moves.push({ x: x + 1, y }); // Right
+      } else {
+        if (y < 4) moves.push({ x, y: y + 1 }); // Forward
+        if (x > 0) moves.push({ x: x - 1, y }); // Left
+        if (x < 4) moves.push({ x: x + 1, y }); // Right
+      }
+    }
+
+    // Add more conditions for Hero1 and Hero2 based on their movement rules
+
+    // Filter out moves that are out of bounds or occupied
+    return moves.filter(move => isPositionWithinBounds(move.x, move.y) && !gameState.board[move.y][move.x]);
+  };
+
+  const isPositionWithinBounds = (x, y) => {
+    return x >= 0 && x < 5 && y >= 0 && y < 5;
   };
 
   const makeMove = (pieceId, move) => {
@@ -83,11 +128,11 @@ const App = () => {
       {setupMode ? (
         <div>
           <h2 className="text-xl font-semibold text-white mb-4">Setup Your Pieces</h2>
-          <PieceSelection onPiecePlace={handlePiecePlacement} />
+          <PieceSelection onPiecePlace={handlePiecePlacement} onClearBoard={handleClearBoard} />
           <button
             onClick={initializeGame}
             className={`mt-4 px-4 py-2 text-white rounded ${canStartGame() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 cursor-not-allowed'}`}
-            disabled={!canStartGame()} // Disable button if conditions are not met
+            disabled={!canStartGame()}
           >
             Start Game
           </button>
@@ -99,7 +144,14 @@ const App = () => {
               Player {gameState.currentPlayer}
             </span>
           </h2>
-          <GameBoard gameState={gameState} onMove={makeMove} currentPlayer={gameState.currentPlayer} />
+          <GameBoard
+            gameState={gameState}
+            onMove={makeMove}
+            onSelectPiece={selectPiece}
+            selectedPiece={selectedPiece}
+            potentialMoves={potentialMoves}
+            currentPlayer={gameState.currentPlayer}
+          />
         </>
       )}
     </div>
