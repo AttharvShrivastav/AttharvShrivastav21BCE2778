@@ -17,7 +17,7 @@ const App = () => {
   const [potentialMoves, setPotentialMoves] = useState([]); // Track potential moves
 
   useEffect(() => {
-    const websocket = new WebSocket('ws://localhost:8080');
+    const websocket = new WebSocket('https://backendforchess.onrender.com');
     setWs(websocket);
 
     websocket.onmessage = (event) => {
